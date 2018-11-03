@@ -91,9 +91,9 @@ public class ConfigReader {
 		
 		/* read in possible working times */
 		
-		Element workingDays = element.getChild("worktime");
+		Element workingDays = element.getChild("vacancies");
 		if(workingDays == null) {
-			throw new Exception("The node 'worktime' is missing");
+			throw new Exception("The node 'vacancies' is missing");
 		}
 		
 		@SuppressWarnings("unchecked")
@@ -117,15 +117,19 @@ public class ConfigReader {
 		});
 		
 		
-		/* read in the modules we are looking for */
+		/* read in the assignments we are looking for */
 		
-		Element modulesNode = element.getChild("modules");
+		Element modulesNode = element.getChild("assignments");
 		if(modulesNode == null) {
-			throw new Exception("The node 'modules' is missing");
+			throw new Exception("The node 'assignments' is missing");
 		}
 		
 		@SuppressWarnings("unchecked")
-		List<Element> moduleNodes = modulesNode.getChildren("module");
+		List<Element> moduleNodes = modulesNode.getChildren("assignment");
+		
+		if(moduleNodes == null) {
+			throw new Exception("No nodes 'assignment' have been found - nothing to do");
+		}
 		
 		for(Element moduleNode : moduleNodes) {
 			if(moduleNode.getAttributeValue("pattern") == null) {
@@ -140,7 +144,10 @@ public class ConfigReader {
 			);
 			
 			@SuppressWarnings("unchecked")
-			List<Element> works = moduleNode.getChildren("work");
+			List<Element> works = moduleNode.getChildren("task");
+			if(works == null) {
+				throw new Exception("No nodes 'task' have been found in the assignement with the pattern '" + m.getRegex() + "'- nothing to do");
+			}
 			
 			for(Element workNode : works) {
 				if(workNode.getAttributeValue("name") == null) {
