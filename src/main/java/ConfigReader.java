@@ -26,19 +26,19 @@ public class ConfigReader {
 	
 	private String name;
 	private String temporaryLocation;
-	private ArrayList<Vacancy> workingtimes;
-	private ArrayList<Module> modules;
+	private ArrayList<Vacancy> vacancies;
+	private ArrayList<Assignment> assignments;
 	
 	public ConfigReader(String path) {
 		file = new File(path);
-		workingtimes = new ArrayList<Vacancy>();
-		modules = new ArrayList<Module>();
+		vacancies = new ArrayList<Vacancy>();
+		assignments = new ArrayList<Assignment>();
 	}
 	
 	public ConfigReader(File file) {
 		this.file = file;
-		workingtimes = new ArrayList<Vacancy>();
-		modules = new ArrayList<Module>();
+		vacancies = new ArrayList<Vacancy>();
+		assignments = new ArrayList<Assignment>();
 	}
 	
 	
@@ -64,53 +64,53 @@ public class ConfigReader {
 	}
 	
 	private void processDocument(Document doc) throws Exception {
-		Element element = doc.getRootElement();
+		Element calendarNode = doc.getRootElement();
 		
-		if(!element.getName().equals("calendar")) {
+		if(!calendarNode.getName().equals("calendar")) {
 			throw new Exception("Root element must be <calendar>");
 		}
 		
 		/* get the calendar name */
-		if(element.getAttributeValue("name") == null ) {
+		if(calendarNode.getAttributeValue("name") == null ) {
 			throw new Exception("The node 'calendar' is missing the 'name' attribute");
 		}
 		
-		name = element.getAttributeValue("name");
+		name = calendarNode.getAttributeValue("name");
 		
 		/* fetch the ics file */
 		
-		if(element.getAttributeValue("url") == null ) {
+		if(calendarNode.getAttributeValue("url") == null ) {
 			throw new Exception("The node 'calendar' is missing the 'url' attribute");
 		}
 		
-		URL url = new URL(element.getAttributeValue("url"));
+		URL url = new URL(calendarNode.getAttributeValue("url"));
 		File temp = File.createTempFile("workloadplanner", ".ics");
 		FileUtils.copyURLToFile(url, temp);
 		temporaryLocation = temp.getAbsolutePath();
 		
 		
-		/* read in possible working times */
+		/* read in vacancies (possible working times) */
 		
-		Element workingDays = element.getChild("vacancies");
-		if(workingDays == null) {
+		Element vacanciesNode = calendarNode.getChild("vacancies");
+		if(vacanciesNode == null) {
 			throw new Exception("The node 'vacancies' is missing");
 		}
 		
 		@SuppressWarnings("unchecked")
-		List<Element> days = workingDays.getChildren("time");
+		List<Element> timeNodes = vacanciesNode.getChildren("time");
 		
-		for(Element day : days) {
-			workingtimes.add(new Vacancy(
-					Integer.parseInt(day.getAttributeValue("day")),
-					day.getAttributeValue("from"),
-					day.getAttributeValue("to"),
-					day.getAttributeValue("priority") == null 
+		for(Element timeNode : timeNodes) {
+			vacancies.add(new Vacancy(
+					Integer.parseInt(timeNode.getAttributeValue("day")),
+					timeNode.getAttributeValue("from"),
+					timeNode.getAttributeValue("to"),
+					timeNode.getAttributeValue("priority") == null 
 					? Integer.MAX_VALUE
-					: Integer.parseInt(day.getAttributeValue("priority"))
+					: Integer.parseInt(timeNode.getAttributeValue("priority"))
 			));
 		}
 		
-		workingtimes.sort(new Comparator<Vacancy>() {
+		vacancies.sort(new Comparator<Vacancy>() {
 			public int compare(Vacancy e1, Vacancy e2) {
 				return e1.getPriority() - e2.getPriority();
 			}
@@ -119,58 +119,58 @@ public class ConfigReader {
 		
 		/* read in the assignments we are looking for */
 		
-		Element modulesNode = element.getChild("assignments");
-		if(modulesNode == null) {
+		Element assignmentsNode = calendarNode.getChild("assignments");
+		if(assignmentsNode == null) {
 			throw new Exception("The node 'assignments' is missing");
 		}
 		
 		@SuppressWarnings("unchecked")
-		List<Element> moduleNodes = modulesNode.getChildren("assignment");
+		List<Element> assignmentNodes = assignmentsNode.getChildren("assignment");
 		
-		if(moduleNodes == null) {
+		if(assignmentNodes == null) {
 			throw new Exception("No nodes 'assignment' have been found - nothing to do");
 		}
 		
-		for(Element moduleNode : moduleNodes) {
-			if(moduleNode.getAttributeValue("pattern") == null) {
+		for(Element assignmentNode : assignmentNodes) {
+			if(assignmentNode.getAttributeValue("pattern") == null) {
 				throw new Exception("The attribute 'pattern' is missing");
 			}
 			
-			Module m = new Module(
-					moduleNode.getAttributeValue("pattern"),
-					moduleNode.getAttributeValue("travelhours") == null
+			Assignment assignment = new Assignment(
+					assignmentNode.getAttributeValue("pattern"),
+					assignmentNode.getAttributeValue("travelhours") == null
 					? 0
-					: Integer.parseInt(moduleNode.getAttributeValue("travelhours"))
+					: Integer.parseInt(assignmentNode.getAttributeValue("travelhours"))
 			);
 			
 			@SuppressWarnings("unchecked")
-			List<Element> works = moduleNode.getChildren("task");
-			if(works == null) {
-				throw new Exception("No nodes 'task' have been found in the assignement with the pattern '" + m.getRegex() + "'- nothing to do");
+			List<Element> taskNodes = assignmentNode.getChildren("task");
+			if(taskNodes == null) {
+				throw new Exception("No nodes 'task' have been found in the assignement with the pattern '" + assignment.getRegex() + "'- nothing to do");
 			}
 			
-			for(Element workNode : works) {
-				if(workNode.getAttributeValue("name") == null) {
+			for(Element taskNode : taskNodes) {
+				if(taskNode.getAttributeValue("name") == null) {
 					throw new Exception("The attribute 'name' is missing");
 				}
 				
-				if(workNode.getAttributeValue("type") == null) {
+				if(taskNode.getAttributeValue("type") == null) {
 					throw new Exception("The attribute 'type' is missing");
 				}
 				
-				if(workNode.getAttributeValue("hours") == null) {
+				if(taskNode.getAttributeValue("hours") == null) {
 					throw new Exception("The attribute 'hours' is missing");
 				}
 				
 				
-				m.addWorktype(
-						workNode.getAttributeValue("name"),
-						workNode.getAttributeValue("type").equals("before"),
-						Integer.parseInt(workNode.getAttributeValue("hours"))
+				assignment.addTask(
+						taskNode.getAttributeValue("name"),
+						taskNode.getAttributeValue("type").equals("before"),
+						Integer.parseInt(taskNode.getAttributeValue("hours"))
 				);
 			}
 			
-			modules.add(m);
+			assignments.add(assignment);
 		}
 	}
 	
@@ -184,13 +184,13 @@ public class ConfigReader {
 		return name;
 	}
 	
-	public ArrayList<Vacancy> getWorktimes() throws Exception {
+	public ArrayList<Vacancy> getVacancies() throws Exception {
 		process();
-		return workingtimes;
+		return vacancies;
 	}
 	
-	public ArrayList<Module> getModules() throws Exception {
+	public ArrayList<Assignment> getAssignments() throws Exception {
 		process();
-		return modules;
+		return assignments;
 	}
 }

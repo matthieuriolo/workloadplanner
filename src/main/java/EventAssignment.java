@@ -2,19 +2,19 @@ import java.util.Date;
 
 import net.fortuna.ical4j.model.component.VEvent;
 
-public class CalendarModule {
-	private VEvent comp;
-	private Module mod;
+public class EventAssignment {
+	private VEvent event;
+	private Assignment assignment;
 	
-	public CalendarModule(VEvent event, Module module) {
-		comp = event;
-		mod = module;
+	public EventAssignment(VEvent event, Assignment assignment) {
+		this.event = event;
+		this.assignment = assignment;
 		
-		mod.addEvent(event);
+		assignment.addEvent(event);
 	}
 	
 	public VEvent previousEvent() throws Exception {
-		int pos = mod.getEvents().indexOf(comp);
+		int pos = assignment.getEvents().indexOf(event);
 		
 		if(pos < 0) {
 			throw new Exception("Internal error: could not find event");
@@ -22,32 +22,32 @@ public class CalendarModule {
 		
 		
 		if(pos > 0) {
-			return mod.getEvents().get(pos-1);
+			return assignment.getEvents().get(pos-1);
 		}
 		
 		return null;
 	}
 	
 	public VEvent nextEvent() throws Exception {
-		int pos = mod.getEvents().indexOf(comp);
+		int pos = assignment.getEvents().indexOf(event);
 		
 		if(pos < 0) {
 			throw new Exception("Internal error: could not find event");
 		}
 		
-		if(pos + 1 < mod.getEvents().size()) {
-			return mod.getEvents().get(pos+1);
+		if(pos + 1 < assignment.getEvents().size()) {
+			return assignment.getEvents().get(pos+1);
 		}
 		
 		return null;
 	}
 	
 	public VEvent getEvent() {
-		return comp;
+		return event;
 	}
 	
-	public Module getModule() {
-		return mod;
+	public Assignment getModule() {
+		return assignment;
 	}
 	
 	public DateRange beforeRange() throws Exception {

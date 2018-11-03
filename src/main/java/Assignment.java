@@ -5,15 +5,15 @@ import java.util.stream.Collectors;
 import net.fortuna.ical4j.model.Date;
 import net.fortuna.ical4j.model.component.VEvent;
 
-public class Module {
+public class Assignment {
 	private String regex;
-	private ArrayList<Worktype> worktypes;
+	private ArrayList<Task> tasks;
 	private ArrayList<VEvent> events;
 	private int hours;
 	
 	private boolean eventsSorted = false;
 	
-	public Module(String reg, int hours) throws Exception {
+	public Assignment(String reg, int hours) throws Exception {
 		if(reg.length() == 0) {
 			throw new Exception("You must give a regex pattern");
 		}
@@ -25,7 +25,7 @@ public class Module {
 		regex = reg;
 		this.hours = hours;
 		
-		worktypes = new ArrayList<Worktype>();
+		tasks = new ArrayList<Task>();
 		events = new ArrayList<VEvent>();
 	}
 	
@@ -37,16 +37,16 @@ public class Module {
 		return hours;
 	}
 	
-	public ArrayList<Worktype> getWorktypes() {
-		return worktypes;
+	public ArrayList<Task> getTasks() {
+		return tasks;
 	}
 	
-	public ArrayList<Worktype> getWorktypesBefore() {
-		return new ArrayList<Worktype>(worktypes.stream().filter(w -> w.isBefore()).collect(Collectors.toList()));
+	public ArrayList<Task> getTasksBefore() {
+		return new ArrayList<Task>(tasks.stream().filter(w -> w.isBefore()).collect(Collectors.toList()));
 	}
 	
-	public ArrayList<Worktype> getWorktypesAfter() {
-		return new ArrayList<Worktype>(worktypes.stream().filter(w -> !w.isBefore()).collect(Collectors.toList()));
+	public ArrayList<Task> getTasksAfter() {
+		return new ArrayList<Task>(tasks.stream().filter(w -> !w.isBefore()).collect(Collectors.toList()));
 	}
 	
 	
@@ -77,16 +77,16 @@ public class Module {
 		events.add(event);
 	}
 	
-	public void addWorktype(Worktype type) {
-		worktypes.add(type);
+	public void addTask(Task type) {
+		tasks.add(type);
 	}
 	
-	public void addWorktype(String name, boolean isBefore, int duration) throws Exception {
-		worktypes.add(new Worktype(name, isBefore, duration));
+	public void addTask(String name, boolean isBefore, int duration) throws Exception {
+		tasks.add(new Task(name, isBefore, duration));
 	}
 	
 	public int beforeHours() {
-		return worktypes.stream()
+		return tasks.stream()
 				.filter(w -> w.isBefore())
 				.map(w -> w.getDuration())
 				.reduce(0, (x,y) -> x+y)
@@ -94,7 +94,7 @@ public class Module {
 	}
 	
 	public int afterHours() {
-		return worktypes.stream()
+		return tasks.stream()
 			.filter(w -> !w.isBefore())
 			.map(w -> w.getDuration())
 			.reduce(0, (x,y) -> x+y)

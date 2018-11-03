@@ -1,19 +1,16 @@
-
-import java.util.Calendar;
 import java.util.Date;
 import java.util.UUID;
 
 import net.fortuna.ical4j.model.DateTime;
-import net.fortuna.ical4j.model.TimeZone;
 import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.property.Uid;
 
-public class Worktype {
+public class Task {
 	private boolean isBefore;
 	private int duration;
 	private String name;
 	
-	public Worktype(String name, boolean isBefore, int duration) throws Exception {
+	public Task(String name, boolean isBefore, int duration) throws Exception {
 		if(duration < 1) {
 			throw new Exception("The duration has to be at least 1 hour");
 		}
@@ -37,7 +34,7 @@ public class Worktype {
 		return duration;
 	}
 
-	public VEvent createMissingVacancy(CalendarModule cm, int hours) {
+	public VEvent createMissingVacancy(EventAssignment cm, int hours) {
 		Date start = cm.getEvent().getStartDate().getDate();
 		Date end = new Date(start.getTime() + (hours * 60 * 60 * 1000));
 		VEvent event = new VEvent(

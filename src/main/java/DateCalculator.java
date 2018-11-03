@@ -28,7 +28,7 @@ import net.fortuna.ical4j.model.property.XProperty;
 
 public class DateCalculator {
 	private ArrayList<DateRange> usedRanges;
-	ArrayList<CalendarModule> modules;
+	ArrayList<EventAssignment> modules;
 	
 	
 	/* parses the file and fetches all relevant events */
@@ -42,7 +42,7 @@ public class DateCalculator {
 		
 		ComponentList<VEvent> comps = calendar.getComponents("VEVENT");
 		
-		modules = new ArrayList<CalendarModule>();
+		modules = new ArrayList<EventAssignment>();
 		usedRanges = new ArrayList<DateRange>();
 		
 		for(VEvent comp : comps) {
@@ -56,14 +56,14 @@ public class DateCalculator {
 				continue;
 			}
 			
-			for(Module module : reader.getModules()) {
+			for(Assignment module : reader.getAssignments()) {
 				usedRanges.add(new DateRange(
 						new Date(comp.getStartDate().getDate().getTime() - module.getTravelHours() * (1000 * 60 * 60)),
 						new Date(comp.getEndDate().getDate().getTime() + module.getTravelHours() * (1000 * 60 * 60))
 				));
 				
 				if(comp.getSummary().getValue().matches(module.getRegex())) {
-					modules.add(new CalendarModule(comp, module));
+					modules.add(new EventAssignment(comp, module));
 				}
 			}
 			
@@ -77,8 +77,8 @@ public class DateCalculator {
 		}
 		
 		// sort ascending
-		modules.sort(new Comparator<CalendarModule>() {    
-		    public int compare(CalendarModule e1, CalendarModule e2) {
+		modules.sort(new Comparator<EventAssignment>() {    
+		    public int compare(EventAssignment e1, EventAssignment e2) {
 		        Date d1 = e1.getEvent().getStartDate().getDate();
 		        Date d2 = e2.getEvent().getStartDate().getDate();
 		        return d1.compareTo(d2);
@@ -109,12 +109,12 @@ public class DateCalculator {
 		return event;
 	}
 	
-	private void processEvent(ArrayList<CalendarComponent> ret, ConfigReader reader, CalendarModule cm, Worktype type, Date from, Date to) throws Exception {
+	private void processEvent(ArrayList<CalendarComponent> ret, ConfigReader reader, EventAssignment cm, Task type, Date from, Date to) throws Exception {
 		VEvent evt = null;
 		int hours = type.getDuration();
 		
 		//Date date = cm.startDate();
-		for(Vacancy vakanz : reader.getWorktimes()) {
+		for(Vacancy vakanz : reader.getVacancies()) {
 			if(hours <= 0) {
 				break;
 			}
@@ -169,13 +169,13 @@ public class DateCalculator {
 			return ret;
 		}
 		
-		for(CalendarModule cm : modules) {
-			for(Worktype type : cm.getModule().getWorktypesBefore()) {
+		for(EventAssignment cm : modules) {
+			for(Task type : cm.getModule().getTasksBefore()) {
 				DateRange r = cm.beforeRange();
 				processEvent(ret, reader, cm, type, r.getStart(), r.getEnd());
 			}
 			
-			for(Worktype type : cm.getModule().getWorktypesAfter()) {
+			for(Task type : cm.getModule().getTasksAfter()) {
 				DateRange r = cm.afterRange();
 				processEvent(ret, reader, cm, type, r.getStart(), r.getEnd());
 			}
