@@ -13,20 +13,20 @@ You need to provide in the config file a URL to an existing ics file. Define you
 <?xml version="1.0" encoding="UTF-8"?>
 <calendar name="CALENDAR_NAME" url="URL_TO_ICS">
 	
-	<worktime>
+	<vacancies>
 		<!-- indexed by 1 = Sunday -->
 		<time day="1" from="08:00" to="12:00" priority="1" />
 		<time day="1" from="13:00" to="18:00" priority="1"/>
 
 
 		<time day="2" from="19:00" to="22:00" priority="2" />
-	</worktime>
+	</vacancies>
 
 
-	<modules>
-		<module pattern="REGEX_PATTERN_FOR_EVENTS_IN_DOWNLOADED_ICS" travelhours="2">
-			<work name="EVENTS_BEFORE" type="before" hours="6" />
-			<work name="EVENTS_AFTER" type="after" hours="1" />
-		</module>
-	</modules>
+	<assignments>
+		<assignment pattern="REGEX_PATTERN_FOR_EVENTS_IN_DOWNLOADED_ICS" travelhours="2">
+			<task name="EVENTS_BEFORE" type="before" hours="6" />
+			<task name="EVENTS_AFTER" type="after" hours="1" />
+		</assignment>
+	</assignments>
 </calendar>
