@@ -25,22 +25,17 @@ public class ConfigReader {
 	
 	
 	private String name;
-	private String temporaryLocation;
-	private ArrayList<Vacancy> vacancies;
-	private ArrayList<Assignment> assignments;
+	private ArrayList<File> icsLocations = new ArrayList<File>();
+	private ArrayList<Vacancy> vacancies = new ArrayList<Vacancy>();
+	private ArrayList<Assignment> assignments = new ArrayList<Assignment>();
 	
 	public ConfigReader(String path) {
 		file = new File(path);
-		vacancies = new ArrayList<Vacancy>();
-		assignments = new ArrayList<Assignment>();
 	}
 	
 	public ConfigReader(File file) {
 		this.file = file;
-		vacancies = new ArrayList<Vacancy>();
-		assignments = new ArrayList<Assignment>();
 	}
-	
 	
 	public void process() throws Exception {
 		if(processed) {
@@ -77,20 +72,39 @@ public class ConfigReader {
 		
 		name = calendarNode.getAttributeValue("name");
 		
-		/* fetch the ics file */
-		
-		if(calendarNode.getAttributeValue("url") == null ) {
-			throw new Exception("The node 'calendar' is missing the 'url' attribute");
+		/* fetch the ics files */
+		Element scheduleNode = calendarNode.getChild("schedules");
+		if(scheduleNode == null) {
+			throw new Exception("The node 'schedules' is missing");
 		}
 		
-		URL url = new URL(calendarNode.getAttributeValue("url"));
-		File temp = File.createTempFile("workloadplanner", ".ics");
-		FileUtils.copyURLToFile(url, temp);
-		temporaryLocation = temp.getAbsolutePath();
+		@SuppressWarnings("unchecked")
+		List<Element> urlNodes = scheduleNode.getChildren("url");
+		@SuppressWarnings("unchecked")
+		List<Element> fileNodes = scheduleNode.getChildren("file");
 		
+		if(urlNodes == null || fileNodes == null) {
+			throw new Exception("No nodes ('url' or 'file') for schedules have been found - nothing to do");
+		}
+		
+		for(Element urlNode : urlNodes) {
+			URL url = new URL(urlNode.getTextTrim());
+			File temp = File.createTempFile("workloadplanner", ".ics");
+			FileUtils.copyURLToFile(url, temp);
+			icsLocations.add(temp);
+		}
+		
+		
+		for(Element fileNode : fileNodes) {
+			File file = new File(fileNode.getTextTrim());
+			if(!file.exists() || !file.isFile()) {
+				throw new Exception("The schedule file '" + fileNode.getTextTrim() + "' does not exist");
+			}
+			
+			icsLocations.add(file);
+		}
 		
 		/* read in vacancies (possible working times) */
-		
 		Element vacanciesNode = calendarNode.getChild("vacancies");
 		if(vacanciesNode == null) {
 			throw new Exception("The node 'vacancies' is missing");
@@ -98,6 +112,10 @@ public class ConfigReader {
 		
 		@SuppressWarnings("unchecked")
 		List<Element> timeNodes = vacanciesNode.getChildren("time");
+		if(timeNodes == null) {
+			throw new Exception("No nodes 'time' have been found - nothing to do");
+		}
+		
 		
 		for(Element timeNode : timeNodes) {
 			vacancies.add(new Vacancy(
@@ -174,9 +192,9 @@ public class ConfigReader {
 		}
 	}
 	
-	public String getPathToICS() throws Exception {
+	public ArrayList<File> getPathsToICS() throws Exception {
 		process();
-		return temporaryLocation;
+		return icsLocations;
 	}
 	
 	public String getName() throws Exception {

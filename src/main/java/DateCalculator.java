@@ -27,57 +27,58 @@ import net.fortuna.ical4j.model.property.Version;
 import net.fortuna.ical4j.model.property.XProperty;
 
 public class DateCalculator {
-	private ArrayList<DateRange> usedRanges;
-	ArrayList<EventAssignment> modules;
+	private ArrayList<DateRange> reservedRanges;
+	ArrayList<EventAssignment> eventAssignments;
 	
 	
 	/* parses the file and fetches all relevant events */
 	private void fetchEvents(ConfigReader reader) throws Exception {
 		/* parse ics file */
-		FileInputStream fin = new FileInputStream(reader.getPathToICS());
-		CalendarBuilder builder = new CalendarBuilder();
-		Calendar calendar = builder.build(fin);
 		
-		/* fetch all relevant events */
+		eventAssignments = new ArrayList<EventAssignment>();
+		reservedRanges = new ArrayList<DateRange>();
 		
-		ComponentList<VEvent> comps = calendar.getComponents("VEVENT");
 		
-		modules = new ArrayList<EventAssignment>();
-		usedRanges = new ArrayList<DateRange>();
-		
-		for(VEvent comp : comps) {
-			//ignore unconfirmed events
-			if(comp.getStatus() == null || !comp.getStatus().getValue().equals("CONFIRMED")) {
-				continue;
-			}
+		for(File path : reader.getPathsToICS()) {
+			FileInputStream fin = new FileInputStream(path);
+			CalendarBuilder builder = new CalendarBuilder();
+			Calendar calendar = builder.build(fin);
+			fin.close();
 			
-			//test if the summary/title matches a regex
-			if(comp.getSummary() == null || comp.getSummary().getValue().length() == 0) {
-				continue;
-			}
+			/* fetch all relevant events */
+			ComponentList<VEvent> events = calendar.getComponents("VEVENT");
 			
-			for(Assignment module : reader.getAssignments()) {
-				usedRanges.add(new DateRange(
-						new Date(comp.getStartDate().getDate().getTime() - module.getTravelHours() * (1000 * 60 * 60)),
-						new Date(comp.getEndDate().getDate().getTime() + module.getTravelHours() * (1000 * 60 * 60))
+			for(VEvent event : events) {
+				//ignore unconfirmed events
+				if(event.getStatus() == null || !event.getStatus().getValue().equals("CONFIRMED")) {
+					continue;
+				}
+				
+				reservedRanges.add(new DateRange(
+					new Date(event.getStartDate().getDate().getTime()),
+					new Date(event.getEndDate().getDate().getTime())
 				));
 				
-				if(comp.getSummary().getValue().matches(module.getRegex())) {
-					modules.add(new EventAssignment(comp, module));
+				//test if the summary/title matches a regex
+				if(event.getSummary() == null || event.getSummary().getValue().length() == 0) {
+					continue;
+				}
+				
+				for(Assignment assignment : reader.getAssignments()) {
+					if(event.getSummary().getValue().matches(assignment.getRegex())) {
+						reservedRanges.add(new DateRange(
+							new Date(event.getStartDate().getDate().getTime() - assignment.getTravelHours() * (1000 * 60 * 60)),
+							new Date(event.getEndDate().getDate().getTime() + assignment.getTravelHours() * (1000 * 60 * 60))
+						));
+						
+						eventAssignments.add(new EventAssignment(event, assignment));
+					}
 				}
 			}
-			
-			/*
-			example:
-			  DTSTART 20190105T084500Z
-			  DTEND 20190105T120000Z
-			  SUMMARY WebG.BSc INF 2018.BE2.HS18/19 - WebG: Web-Grundlagen
-			 */
-			
 		}
 		
 		// sort ascending
-		modules.sort(new Comparator<EventAssignment>() {    
+		eventAssignments.sort(new Comparator<EventAssignment>() {    
 		    public int compare(EventAssignment e1, EventAssignment e2) {
 		        Date d1 = e1.getEvent().getStartDate().getDate();
 		        Date d2 = e2.getEvent().getStartDate().getDate();
@@ -128,7 +129,7 @@ public class DateCalculator {
 				}
 				
 				DateRange possibleRange = vakanz.getRange(date);
-				ArrayList<DateRange> ranges = possibleRange.substractCollisions(usedRanges);
+				ArrayList<DateRange> ranges = possibleRange.substractCollisions(reservedRanges);
 				
 				if(ranges.isEmpty()) {
 					date = increaseDateByDay(date);
@@ -143,7 +144,7 @@ public class DateCalculator {
 				
 				hours -= possibleRange.getDuration();
 				
-				usedRanges.add(possibleRange);
+				reservedRanges.add(possibleRange);
 				
 				evt = createEvent(possibleRange, type.getName() + " for " + cm.getEvent().getStartDate().getDate().toLocaleString());
 				ret.add(evt);
@@ -164,12 +165,12 @@ public class DateCalculator {
 		
 		ArrayList<CalendarComponent> ret = new ArrayList<CalendarComponent>();
 		
-		if(modules.isEmpty()) {
-			System.out.println("No modules are matching any of the given events!");
+		if(eventAssignments.isEmpty()) {
+			System.out.println("No assignments are matching any of the given events!");
 			return ret;
 		}
 		
-		for(EventAssignment cm : modules) {
+		for(EventAssignment cm : eventAssignments) {
 			for(Task type : cm.getModule().getTasksBefore()) {
 				DateRange r = cm.beforeRange();
 				processEvent(ret, reader, cm, type, r.getStart(), r.getEnd());
