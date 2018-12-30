@@ -83,25 +83,28 @@ public class ConfigReader {
 		@SuppressWarnings("unchecked")
 		List<Element> fileNodes = scheduleNode.getChildren("file");
 		
-		if(urlNodes == null || fileNodes == null || urlNodes.isEmpty() || fileNodes.isEmpty()) {
+		if((urlNodes == null || urlNodes.isEmpty()) && (fileNodes == null || fileNodes.isEmpty())) {
 			throw new Exception("No nodes ('url' or 'file') for schedules have been found - nothing to do");
 		}
 		
-		for(Element urlNode : urlNodes) {
-			URL url = new URL(urlNode.getTextTrim());
-			File temp = File.createTempFile("workloadplanner", ".ics");
-			FileUtils.copyURLToFile(url, temp);
-			icsLocations.add(temp);
+		if(urlNodes != null) {
+			for(Element urlNode : urlNodes) {
+				URL url = new URL(urlNode.getTextTrim());
+				File temp = File.createTempFile("workloadplanner", ".ics");
+				FileUtils.copyURLToFile(url, temp);
+				icsLocations.add(temp);
+			}
 		}
 		
-		
-		for(Element fileNode : fileNodes) {
-			File file = new File(fileNode.getTextTrim());
-			if(!file.exists() || !file.isFile()) {
-				throw new Exception("The schedule file '" + fileNode.getTextTrim() + "' does not exist");
+		if(fileNodes != null) {
+			for(Element fileNode : fileNodes) {
+				File file = new File(fileNode.getTextTrim());
+				if(!file.exists() || !file.isFile()) {
+					throw new Exception("The schedule file '" + fileNode.getTextTrim() + "' does not exist");
+				}
+				
+				icsLocations.add(file);
 			}
-			
-			icsLocations.add(file);
 		}
 		
 		/* read in vacancies (possible working times) */
