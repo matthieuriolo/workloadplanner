@@ -4,6 +4,7 @@ import java.io.FileOutputStream;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 import org.apache.commons.lang.time.DateUtils;
@@ -27,8 +28,8 @@ import net.fortuna.ical4j.model.property.Version;
 import net.fortuna.ical4j.model.property.XProperty;
 
 public class DateCalculator {
-	private ArrayList<DateRange> reservedRanges;
-	ArrayList<EventAssignment> eventAssignments;
+	private List<DateRange> reservedRanges;
+	List<EventAssignment> eventAssignments;
 	
 	
 	/* parses the file and fetches all relevant events */
@@ -109,7 +110,7 @@ public class DateCalculator {
 		return event;
 	}
 	
-	private void processEvent(ArrayList<CalendarComponent> ret, ConfigReader reader, EventAssignment cm, Task type, Date from, Date to) throws Exception {
+	private void processEvent(List<CalendarComponent> ret, ConfigReader reader, EventAssignment cm, Task type, Date from, Date to) throws Exception {
 		VEvent evt = null;
 		int hours = type.getDuration();
 		
@@ -128,7 +129,7 @@ public class DateCalculator {
 				}
 				
 				DateRange possibleRange = vakanz.getRange(date);
-				ArrayList<DateRange> ranges = possibleRange.substractCollisions(reservedRanges);
+				List<DateRange> ranges = possibleRange.substractCollisions(reservedRanges);
 				
 				if(ranges.isEmpty()) {
 					date = increaseDateByDay(date);
@@ -159,10 +160,10 @@ public class DateCalculator {
 		}
 	}
 	
-	public ArrayList<CalendarComponent > calculateEvents(ConfigReader reader) throws Exception {
+	public List<CalendarComponent > calculateEvents(ConfigReader reader) throws Exception {
 		fetchEvents(reader);
 		
-		ArrayList<CalendarComponent> ret = new ArrayList<CalendarComponent>();
+		List<CalendarComponent> ret = new ArrayList<CalendarComponent>();
 		
 		if(eventAssignments.isEmpty()) {
 			System.out.println("No assignments are matching any of the given events!");
@@ -194,7 +195,7 @@ public class DateCalculator {
 	}
 	
 	public boolean calculateAndSave(ConfigReader reader, File location) throws Exception {
-		ArrayList<CalendarComponent> components = calculateEvents(reader);
+		List<CalendarComponent> components = calculateEvents(reader);
 		
 		if(components.isEmpty()) {
 			System.out.println("No events has been generated!");

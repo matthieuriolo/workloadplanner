@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class DateRange {
@@ -69,15 +70,15 @@ public class DateRange {
 
 
 
-	public ArrayList<DateRange> substractCollisions(ArrayList<DateRange> ranges) throws Exception {
-		ArrayList<DateRange> looper = new ArrayList<DateRange>();
+	public List<DateRange> substractCollisions(List<DateRange> ranges) throws Exception {
+		List<DateRange> looper = new ArrayList<DateRange>();
 		looper.add(this);
 		boolean hasCollision;
 		
 		
 		do {
 			hasCollision = false;
-			ArrayList<DateRange> tmp = new ArrayList<DateRange>();
+			List<DateRange> tmp = new ArrayList<DateRange>();
 			
 			for(DateRange r : looper) {
 				boolean coll = false;

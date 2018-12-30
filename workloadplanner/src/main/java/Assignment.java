@@ -1,5 +1,6 @@
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import net.fortuna.ical4j.model.Date;
@@ -7,8 +8,8 @@ import net.fortuna.ical4j.model.component.VEvent;
 
 public class Assignment {
 	private String regex;
-	private ArrayList<Task> tasks;
-	private ArrayList<VEvent> events;
+	private List<Task> tasks;
+	private List<VEvent> events;
 	private int hours;
 	
 	private boolean eventsSorted = false;
@@ -37,24 +38,24 @@ public class Assignment {
 		return hours;
 	}
 	
-	public ArrayList<Task> getTasks() {
+	public List<Task> getTasks() {
 		return tasks;
 	}
 	
-	public ArrayList<Task> getTasksBefore() {
+	public List<Task> getTasksBefore() {
 		return new ArrayList<Task>(tasks.stream().filter(w -> w.isBefore()).collect(Collectors.toList()));
 	}
 	
-	public ArrayList<Task> getTasksAfter() {
+	public List<Task> getTasksAfter() {
 		return new ArrayList<Task>(tasks.stream().filter(w -> !w.isBefore()).collect(Collectors.toList()));
 	}
 	
 	
-	public ArrayList<VEvent> getEvents() {
+	public List<VEvent> getEvents() {
 		return getEvents(true);
 	}
 	
-	public ArrayList<VEvent> getEvents(boolean sorted) {
+	public List<VEvent> getEvents(boolean sorted) {
 		if(sorted) {
 			if(!eventsSorted) {
 				events.sort(new Comparator<VEvent>() {    

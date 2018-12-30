@@ -25,9 +25,9 @@ public class ConfigReader {
 	
 	
 	private String name;
-	private ArrayList<File> icsLocations = new ArrayList<File>();
-	private ArrayList<Vacancy> vacancies = new ArrayList<Vacancy>();
-	private ArrayList<Assignment> assignments = new ArrayList<Assignment>();
+	private List<File> icsLocations = new ArrayList<File>();
+	private List<Vacancy> vacancies = new ArrayList<Vacancy>();
+	private List<Assignment> assignments = new ArrayList<Assignment>();
 	
 	public ConfigReader(String path) {
 		file = new File(path);
@@ -195,7 +195,7 @@ public class ConfigReader {
 		}
 	}
 	
-	public ArrayList<File> getPathsToICS() throws Exception {
+	public List<File> getPathsToICS() throws Exception {
 		process();
 		return icsLocations;
 	}
@@ -205,12 +205,12 @@ public class ConfigReader {
 		return name;
 	}
 	
-	public ArrayList<Vacancy> getVacancies() throws Exception {
+	public List<Vacancy> getVacancies() throws Exception {
 		process();
 		return vacancies;
 	}
 	
-	public ArrayList<Assignment> getAssignments() throws Exception {
+	public List<Assignment> getAssignments() throws Exception {
 		process();
 		return assignments;
 	}
