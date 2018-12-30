@@ -83,7 +83,7 @@ public class ConfigReader {
 		@SuppressWarnings("unchecked")
 		List<Element> fileNodes = scheduleNode.getChildren("file");
 		
-		if(urlNodes == null || fileNodes == null) {
+		if(urlNodes == null || fileNodes == null || urlNodes.isEmpty() || fileNodes.isEmpty()) {
 			throw new Exception("No nodes ('url' or 'file') for schedules have been found - nothing to do");
 		}
 		
@@ -112,7 +112,7 @@ public class ConfigReader {
 		
 		@SuppressWarnings("unchecked")
 		List<Element> timeNodes = vacanciesNode.getChildren("time");
-		if(timeNodes == null) {
+		if(timeNodes == null || timeNodes.isEmpty()) {
 			throw new Exception("No nodes 'time' have been found - nothing to do");
 		}
 		

@@ -34,7 +34,6 @@ public class DateCalculator {
 	/* parses the file and fetches all relevant events */
 	private void fetchEvents(ConfigReader reader) throws Exception {
 		/* parse ics file */
-		
 		eventAssignments = new ArrayList<EventAssignment>();
 		reservedRanges = new ArrayList<DateRange>();
 		
