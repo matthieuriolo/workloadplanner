@@ -11,7 +11,11 @@ You need to provide in the config file a URL to an existing ics file. Define you
 
 ```
 <?xml version="1.0" encoding="UTF-8"?>
-<calendar name="CALENDAR_NAME" url="URL_TO_ICS">
+<calendar name="CALENDAR_NAME">
+	<schedules>
+		 <url>URL_TO_ICS</url>
+		 <file>FILE_TO_ICS</file>
+	</schedules>
 	
 	<vacancies>
 		<!-- indexed by 1 = Sunday -->
