@@ -1,15 +1,43 @@
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.Date;
+
+import java.time.temporal.ChronoUnit;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 public class DateRange {
-	private Date start;
-	private Date end;
+	private LocalDateTime start;
+	private LocalDateTime end;
 	
+	
+	public DateRange(LocalDateTime from, LocalDateTime to) throws Exception {
+		initRange(from, to);
+	}
 	
 	public DateRange(Date from, Date to) throws Exception {
-		if(from.after(to)) {
+		LocalDateTime f = convertDateToLocaleDateTime(from);
+		LocalDateTime t = convertDateToLocaleDateTime(to);
+		initRange(f, t);
+	}
+	
+	public DateRange(Date from, Date to, long tolerance) throws Exception {
+		LocalDateTime f = convertDateToLocaleDateTime(from);
+		LocalDateTime t = convertDateToLocaleDateTime(to);
+		
+		f = f.minusHours(tolerance);
+		t = t.plusHours(tolerance);
+		
+		initRange(f, t);
+	}
+	
+	private LocalDateTime convertDateToLocaleDateTime(Date date) {
+		return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+	}
+	
+	private void initRange(LocalDateTime from, LocalDateTime to) throws Exception {
+		if(from.isAfter(to)) {
 			throw new Exception("Param from must be before to");
 		}
 		
@@ -20,13 +48,13 @@ public class DateRange {
 	
 	public boolean insideRange(DateRange range) {
 		return (
-					range.getStart().before(getStart())
+					range.getStart().isBefore(getStart())
 					||
 					range.getStart().equals(getStart())
 				)
 				&&
 				(
-					range.getEnd().after(getEnd())
+					range.getEnd().isAfter(getEnd())
 					||
 					range.getEnd().equals(getEnd())
 				);
@@ -42,30 +70,30 @@ public class DateRange {
 		;
 	}
 	
-	public boolean collision(Date date) {
-		return date.after(getStart()) && date.before(getEnd());
+	public boolean collision(LocalDateTime date) {
+		return date.isAfter(getStart()) && date.isBefore(getEnd());
 	}
 	
-	public Date getStart() {
+	public LocalDateTime getStart() {
 		return start;
 	}
 
 
-	public Date getEnd() {
+	public LocalDateTime getEnd() {
 		return end;
 	}
 	
 	
-	public int getDuration() {
-		return (int) ((end.getTime() - start.getTime()) / (1000 * 60 * 60));
+	public long getDuration() {
+		return start.until(end, ChronoUnit.HOURS);
 	}
 	
-	public void setDuration(int hours) throws Exception {
+	public void setDuration(long hours) throws Exception {
 		if(hours < 1) {
 			throw new Exception("hours must be more than 0");
 		}
 		
-		end = new Date(start.getTime() + (hours * 1000 * 60 * 60));
+		end = start.plus(hours, ChronoUnit.HOURS);
 	}
 
 
@@ -101,8 +129,8 @@ public class DateRange {
 								tmp.add(new DateRange(r.getStart(), range.getStart()));
 							}else {
 								
-								System.out.println(r.getStart().toGMTString() + " " + r.getEnd().toGMTString());
-								System.out.println(range.getStart().toGMTString() + " " + range.getEnd().toGMTString());
+								System.out.println(r.getStart() + " " + r.getEnd());
+								System.out.println(range.getStart() + " " + range.getEnd());
 								
 								throw new Exception("Internal logic error");
 							}

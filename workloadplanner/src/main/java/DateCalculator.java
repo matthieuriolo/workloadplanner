@@ -2,12 +2,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
-
-import org.apache.commons.lang.time.DateUtils;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 import net.fortuna.ical4j.data.CalendarBuilder;
 import net.fortuna.ical4j.data.CalendarOutputter;
@@ -55,8 +53,8 @@ public class DateCalculator {
 				}
 				
 				reservedRanges.add(new DateRange(
-					new Date(event.getStartDate().getDate().getTime()),
-					new Date(event.getEndDate().getDate().getTime())
+					event.getStartDate().getDate(),
+					event.getEndDate().getDate()
 				));
 				
 				//test if the summary/title matches a regex
@@ -67,8 +65,9 @@ public class DateCalculator {
 				for(Assignment assignment : reader.getAssignments()) {
 					if(event.getSummary().getValue().matches(assignment.getRegex())) {
 						reservedRanges.add(new DateRange(
-							new Date(event.getStartDate().getDate().getTime() - assignment.getTravelHours() * (1000 * 60 * 60)),
-							new Date(event.getEndDate().getDate().getTime() + assignment.getTravelHours() * (1000 * 60 * 60))
+							event.getStartDate().getDate(),
+							event.getEndDate().getDate(),
+							assignment.getTravelHours()
 						));
 						
 						eventAssignments.add(new EventAssignment(event, assignment));
@@ -78,13 +77,10 @@ public class DateCalculator {
 		}
 		
 		// sort ascending
-		eventAssignments.sort(new Comparator<EventAssignment>() {    
-		    public int compare(EventAssignment e1, EventAssignment e2) {
-		        Date d1 = e1.getEvent().getStartDate().getDate();
-		        Date d2 = e2.getEvent().getStartDate().getDate();
-		        return d1.compareTo(d2);
-		    }
-		});
+		eventAssignments.sort(
+				(a, b) -> a.getEvent().getStartDate().getDate()
+					.compareTo(b.getEvent().getStartDate().getDate())
+		);
 	}
 	
 	private VEvent createEvent(DateRange range, String summary) {
@@ -92,10 +88,10 @@ public class DateCalculator {
 	}
 	
 	
-	private VEvent createEvent(Date start, Date end, String summary) {
+	private VEvent createEvent(LocalDateTime start, LocalDateTime end, String summary) {
 		VEvent event = new VEvent(
-				new DateTime(start.getTime()),
-				new DateTime(end.getTime()),
+				new DateTime(DateTime.from(start.atZone(ZoneId.systemDefault()).toInstant())),
+				new DateTime(DateTime.from(end.atZone(ZoneId.systemDefault()).toInstant())),
 				summary
 		);
 		
@@ -110,7 +106,7 @@ public class DateCalculator {
 		return event;
 	}
 	
-	private void processEvent(List<CalendarComponent> ret, ConfigReader reader, EventAssignment cm, Task type, Date from, Date to) throws Exception {
+	private void processEvent(List<CalendarComponent> ret, ConfigReader reader, EventAssignment cm, Task type, LocalDateTime from, LocalDateTime to) throws Exception {
 		VEvent evt = null;
 		int hours = type.getDuration();
 		
@@ -120,9 +116,9 @@ public class DateCalculator {
 				break;
 			}
 			
-			Date date = (Date) from.clone();
+			LocalDateTime date = from;
 			
-			while(hours > 0 && date.before(to)) {
+			while(hours > 0 && date.isBefore(to)) {
 				if(!vakanz.sameWeekday(date)) {
 					date = increaseDateByDay(date);
 					continue;
@@ -186,12 +182,13 @@ public class DateCalculator {
 	}
 	
 	
-	private Date increaseDateByDay(Date initialDate) {
-		initialDate = DateUtils.setHours(initialDate, 0);
-		initialDate = DateUtils.setMinutes(initialDate, 0);
-		initialDate = DateUtils.setSeconds(initialDate, 0);
+	private LocalDateTime increaseDateByDay(LocalDateTime initialDate) {
+		initialDate.minusHours(initialDate.getHour());
+		initialDate.minusMinutes(initialDate.getMinute());
+		initialDate.minusSeconds(initialDate.getSecond());
+		initialDate.minusNanos(initialDate.getNano());
 		
-		return DateUtils.addDays(initialDate, 1);
+		return initialDate.plusDays(1);
 	}
 	
 	public boolean calculateAndSave(ConfigReader reader, File location) throws Exception {
