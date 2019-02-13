@@ -1,5 +1,4 @@
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -58,14 +57,7 @@ public class Assignment {
 	public List<VEvent> getEvents(boolean sorted) {
 		if(sorted) {
 			if(!eventsSorted) {
-				events.sort(new Comparator<VEvent>() {    
-				    public int compare(VEvent e1, VEvent e2) {
-				        Date d1 = e1.getStartDate().getDate();
-				        Date d2 = e2.getStartDate().getDate();
-				        return d1.compareTo(d2);
-				    }
-				});
-				
+				events.sort((a, b) -> a.getStartDate().getDate().compareTo(b.getStartDate().getDate()));
 				eventsSorted = true;
 			}
 		}

@@ -10,7 +10,6 @@ import java.io.File;
 
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 import org.apache.commons.io.FileUtils;
@@ -131,12 +130,8 @@ public class ConfigReader {
 			));
 		}
 		
-		vacancies.sort(new Comparator<Vacancy>() {
-			public int compare(Vacancy e1, Vacancy e2) {
-				return e1.getPriority() - e2.getPriority();
-			}
-		});
 		
+		vacancies.sort((a, b) -> a.getPriority() - b.getPriority());
 		
 		/* read in the assignments we are looking for */
 		
