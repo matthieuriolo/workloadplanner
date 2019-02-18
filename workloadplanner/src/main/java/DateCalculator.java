@@ -1,6 +1,7 @@
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -107,6 +108,7 @@ public class DateCalculator {
 	}
 	
 	private void processEvent(List<CalendarComponent> ret, ConfigReader reader, EventAssignment cm, Task type, LocalDateTime from, LocalDateTime to) throws Exception {
+		DateFormat formatter = DateFormat.getDateTimeInstance();
 		VEvent evt = null;
 		int hours = type.getDuration();
 		
@@ -142,7 +144,7 @@ public class DateCalculator {
 				
 				reservedRanges.add(possibleRange);
 				
-				evt = createEvent(possibleRange, type.getName() + " for " + cm.getEvent().getStartDate().getDate().toLocaleString());
+				evt = createEvent(possibleRange, type.getName() + " for " + formatter.format(cm.getEvent().getStartDate().getDate()));
 				ret.add(evt);
 			}
 		}
@@ -151,7 +153,7 @@ public class DateCalculator {
 		
 		if(hours > 0) {
 			//we are not able to find free space for the given worktype - add a note and tell the user that he has not enough time
-			System.out.println("Missing vacancy (" + hours + "h) for " + type.getName() + " " + cm.getEvent().getStartDate().getDate().toLocaleString());
+			System.out.println("Missing vacancy (" + hours + "h) for " + type.getName() + " " + formatter.format(cm.getEvent().getStartDate().getDate()));
 			ret.add(type.createMissingVacancy(cm, hours));
 		}
 	}
