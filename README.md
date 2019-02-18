@@ -34,3 +34,22 @@ You need to provide in the config file a URL to an existing ics file. Define you
 		</assignment>
 	</assignments>
 </calendar>
+```
+
+## Placeholders
+
+The attribute `name` of the xml node `task` can contain the following placeholders
+
+
+ | Placeholder | Description |
+ | ----------- | ----------- |
+ | {page.index} | if the task gets splitted the index represents the current chunk |
+ | {page.total} | total number of chunks |
+ | {event.name} | name of the event which has been matched |
+ | {event.start} | start datetime of the event |
+ | {event.end} | end datetime of the event |
+ | {event.duration} | duration in hours of the event |
+ | {event.end} | end datetime fo the event |
+ | {from} | start datetime of the created task event |
+ | {to} | end datetime of the created task event |
+ | {duration} | duration in hours of the created task event |
