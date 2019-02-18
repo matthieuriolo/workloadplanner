@@ -18,12 +18,12 @@ You need to provide in the config file a URL to an existing ics file. Define you
 	</schedules>
 	
 	<vacancies>
-		<!-- indexed by 1 = Sunday -->
-		<time day="1" from="08:00" to="12:00" priority="1" />
-		<time day="1" from="13:00" to="18:00" priority="1"/>
+		<!-- indexed by 7 = Sunday -->
+		<time day="7" from="08:00" to="12:00" priority="1" />
+		<time day="7" from="13:00" to="18:00" priority="1"/>
 
 
-		<time day="2" from="19:00" to="22:00" priority="2" />
+		<time day="1" from="19:00" to="22:00" priority="2" />
 	</vacancies>
 
 
