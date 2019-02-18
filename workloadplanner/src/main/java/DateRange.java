@@ -22,6 +22,12 @@ public class DateRange {
 		initRange(f, t);
 	}
 	
+	public DateRange(Date from, long duration) throws Exception {
+		LocalDateTime f = convertDateToLocaleDateTime(from);
+		LocalDateTime t = f.plusHours(duration);
+		initRange(f, t);
+	}
+	
 	public DateRange(Date from, Date to, long tolerance) throws Exception {
 		LocalDateTime f = convertDateToLocaleDateTime(from);
 		LocalDateTime t = convertDateToLocaleDateTime(to);

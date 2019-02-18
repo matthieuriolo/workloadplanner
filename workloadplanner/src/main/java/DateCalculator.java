@@ -3,10 +3,15 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 
 import net.fortuna.ical4j.data.CalendarBuilder;
 import net.fortuna.ical4j.data.CalendarOutputter;
@@ -84,6 +89,7 @@ public class DateCalculator {
 		);
 	}
 	
+	/*
 	private VEvent createEvent(DateRange range, String summary) {
 		return createEvent(range.getStart(), range.getEnd(), summary);
 	}
@@ -106,11 +112,54 @@ public class DateCalculator {
 		
 		return event;
 	}
+	*/
+	
+	private VEvent createEvent(Task type, EventAssignment cm, DateRange range, int pageIdx, int pageTotal) {
+		DateFormat formatter = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT);
+		DateTimeFormatter dtformatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM);
+		
+		String summary = type.getName();
+		Map<String, String> arguments = new HashMap<>();
+		
+		arguments.put("page.index", String.valueOf(pageIdx));
+		arguments.put("page.total", String.valueOf(pageTotal));
+		
+		arguments.put("event.name", cm.getEvent().getName());
+		arguments.put("event.start", formatter.format(cm.getEvent().getStartDate().getDate()));
+		arguments.put("event.end", formatter.format(cm.getEvent().getEndDate().getDate()));
+		arguments.put("event.duration", String.valueOf(range.getDuration()));
+		
+		arguments.put("from", range.getStart().format(dtformatter));
+		arguments.put("to", range.getEnd().format(dtformatter));
+		arguments.put("duration", String.valueOf(type.getDuration()));
+		
+		for(String key : arguments.keySet()) {
+			String value = arguments.get(key);
+			summary = summary.replace("{" + key + "}", value);
+		}
+		
+		VEvent event = new VEvent(
+				new DateTime(DateTime.from(range.getStart().atZone(ZoneId.systemDefault()).toInstant())),
+				new DateTime(DateTime.from(range.getEnd().atZone(ZoneId.systemDefault()).toInstant())),
+				summary
+		);
+		
+		event.getProperties().add(new Uid(UUID.randomUUID().toString()));
+		
+		TimeZoneRegistry registry = TimeZoneRegistryFactory.getInstance().createRegistry();
+		TimeZone timezone = registry.getTimeZone("GMT");
+		VTimeZone tz = timezone.getVTimeZone();
+		
+		event.getProperties().add(tz.getTimeZoneId());
+		
+		return event;
+	}
 	
 	private void processEvent(List<CalendarComponent> ret, ConfigReader reader, EventAssignment cm, Task type, LocalDateTime from, LocalDateTime to) throws Exception {
 		DateFormat formatter = DateFormat.getDateTimeInstance();
-		VEvent evt = null;
 		int hours = type.getDuration();
+		
+		List<DateRange> pages = new LinkedList<>();
 		
 		//Date date = cm.startDate();
 		for(Vacancy vakanz : reader.getVacancies()) {
@@ -144,17 +193,24 @@ public class DateCalculator {
 				
 				reservedRanges.add(possibleRange);
 				
-				evt = createEvent(possibleRange, type.getName() + " for " + formatter.format(cm.getEvent().getStartDate().getDate()));
-				ret.add(evt);
+				//evt = createEvent(possibleRange, type.getName() + " for " + formatter.format(cm.getEvent().getStartDate().getDate()));
+				pages.add(possibleRange);
 			}
 		}
 		
 		
-		
+
+		int total = pages.size();
 		if(hours > 0) {
 			//we are not able to find free space for the given worktype - add a note and tell the user that he has not enough time
 			System.out.println("Missing vacancy (" + hours + "h) for " + type.getName() + " " + formatter.format(cm.getEvent().getStartDate().getDate()));
-			ret.add(type.createMissingVacancy(cm, hours));
+			ret.add(createEvent(type, cm, new DateRange(cm.getEvent().getStartDate().getDate(), hours), total, ++total));
+		}
+		
+		int idx = 0;
+		for(DateRange range : pages) {
+			idx++;
+			ret.add(createEvent(type, cm, range, idx, total));
 		}
 	}
 	
