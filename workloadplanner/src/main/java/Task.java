@@ -1,4 +1,3 @@
-import java.util.Date;
 import java.util.UUID;
 
 import net.fortuna.ical4j.model.DateTime;
@@ -35,11 +34,12 @@ public class Task {
 	}
 
 	public VEvent createMissingVacancy(EventAssignment cm, int hours) {
-		Date start = cm.getEvent().getStartDate().getDate();
-		Date end = new Date(start.getTime() + (hours * 60 * 60 * 1000));
+		//new DateTime(DateTime.from(start.atZone(ZoneId.systemDefault()).toInstant())),
+		DateTime start = new DateTime(cm.getEvent().getStartDate().getDate().getTime());
+		DateTime end = new DateTime(start.getTime() + (hours * 60 * 60 * 1000));
 		VEvent event = new VEvent(
-				new DateTime(start.getTime()),
-				new DateTime(end.getTime()),
+				start,
+				end,
 				"Missing vacancy: " + this.getName()
 		);
 		
