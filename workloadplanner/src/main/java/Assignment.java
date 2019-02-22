@@ -137,4 +137,15 @@ public class Assignment {
 	public void addTask(String name, boolean isBefore, int duration) {
 		tasks.add(new Task(name, isBefore, duration));
 	}
+	
+	/**
+	 * Prints the Assignment
+	 */
+	public void printVerbose() {
+		System.out.println("Regex: " + regex);
+		System.out.println("Travel hours: " + travelHours);
+		System.out.println("Tasks:");
+		tasks.stream().forEach(c -> c.printVerbose());
+		System.out.println();
+	}
 }

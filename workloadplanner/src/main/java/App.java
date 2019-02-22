@@ -7,6 +7,10 @@ import java.io.File;
  *
  */
 public class App {
+	final static String VERSION = "1.1";
+	final static String APPNAME = "workloader";
+	final static String CREATOR = "Matthieu Riolo";
+	
 	/**
 	 * Main method - entry point of the application
 	 * 
@@ -14,6 +18,19 @@ public class App {
 	 * @throws Exception when there is a failure in the reader or calculator
 	 */
 	public static void main(String[] args) throws Exception {
+		boolean isVerbose = true;
+		
+		for(int idx = 0; idx < args.length; idx++) {
+			String argument = args[idx];
+			
+			switch(argument) {
+				case "--verbose":
+				case "-v":
+					isVerbose = true;
+					break;
+			}
+		}
+		
 		String configName = "config.xml";
 		
 		
@@ -21,9 +38,13 @@ public class App {
 		ConfigReader conf = new ConfigReader(configName);
 		conf.process();
 		
+		if(isVerbose) {
+			conf.printVerbose();
+		}
+		
 		/* calculate dates */
 		
-		DateCalculator calc = new DateCalculator();
+		DateCalculator calc = new DateCalculator(isVerbose);
 		
 		File f = new File("out.ics");
 		if(calc.calculateAndSave(conf, f)) {

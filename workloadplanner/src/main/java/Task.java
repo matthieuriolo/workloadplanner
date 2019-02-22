@@ -51,4 +51,14 @@ public class Task {
 	public int getDuration() {
 		return duration;
 	}
+	
+	/**
+	 * Prints the Assignment
+	 */
+	public void printVerbose() {
+		System.out.println("Name: " + name);
+		System.out.println("isBefore: " + (isBefore ? "yes" : "no"));
+		System.out.println("Duration: " + duration);
+		System.out.println();
+	}
 }

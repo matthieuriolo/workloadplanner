@@ -21,6 +21,7 @@ import net.fortuna.ical4j.data.CalendarOutputter;
 import net.fortuna.ical4j.model.Calendar;
 import net.fortuna.ical4j.model.ComponentList;
 import net.fortuna.ical4j.model.DateTime;
+import net.fortuna.ical4j.model.Property;
 import net.fortuna.ical4j.model.TimeZone;
 import net.fortuna.ical4j.model.TimeZoneRegistry;
 import net.fortuna.ical4j.model.TimeZoneRegistryFactory;
@@ -28,6 +29,7 @@ import net.fortuna.ical4j.model.component.CalendarComponent;
 import net.fortuna.ical4j.model.component.VEvent;
 import net.fortuna.ical4j.model.component.VTimeZone;
 import net.fortuna.ical4j.model.property.CalScale;
+import net.fortuna.ical4j.model.property.DateProperty;
 import net.fortuna.ical4j.model.property.Name;
 import net.fortuna.ical4j.model.property.ProdId;
 import net.fortuna.ical4j.model.property.Uid;
@@ -43,7 +45,16 @@ import net.fortuna.ical4j.model.property.XProperty;
  */
 public class DateCalculator {
 	private List<DateRange> reservedRanges;
-	List<EventAssignment> eventAssignments;
+	private List<EventAssignment> eventAssignments;
+	boolean isVerbose = false;
+	
+	/**
+	 * Constructor of DateCalculator
+	 * @param isVerbose flag will print a more verbose output
+	 */
+	public DateCalculator(boolean isVerbose) {
+		this.isVerbose = isVerbose;
+	}
 	
 	/**
 	 * Parses the ICS files and fetches all relevant events
@@ -54,7 +65,6 @@ public class DateCalculator {
 		/* parse ics file */
 		eventAssignments = new ArrayList<EventAssignment>();
 		reservedRanges = new ArrayList<DateRange>();
-		
 		
 		for(File path : reader.getPathsToICS()) {
 			FileInputStream fin = new FileInputStream(path);
@@ -281,7 +291,7 @@ public class DateCalculator {
 		//create basic calendar
 		Calendar calendar = new Calendar();
 		
-		calendar.getProperties().add(new ProdId("-//Matthieu Riolo//workloadplanner 1.0//EN"));
+		calendar.getProperties().add(new ProdId("-//" + App.CREATOR + "//" + App.APPNAME + " " + App.VERSION + "//EN"));
 		calendar.getProperties().add(Version.VERSION_2_0);
 		calendar.getProperties().add(CalScale.GREGORIAN);
 		
@@ -290,7 +300,24 @@ public class DateCalculator {
 		calendar.getProperties().add(new XProperty("X-WR-CALNAME", reader.getName()));
 		
 		//add events/notes to calendar
-		components.forEach(c -> calendar.getComponents().add(c));
+		if(isVerbose) {
+			System.out.println("The following events will be created:");
+		}
+		
+		components.forEach(c -> {
+			if(isVerbose) {
+				System.out.println(c.getProperty(Property.SUMMARY).getValue());
+				
+				DateProperty prop = ((DateProperty) c.getProperty(Property.DTSTART));
+				System.out.println(prop.getDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime());
+				
+				prop = ((DateProperty) c.getProperty(Property.DTEND));
+				System.out.println(prop.getDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime());
+				System.out.println();
+			}
+			
+			calendar.getComponents().add(c);
+		});
 		
 		
 		//write calendar to file

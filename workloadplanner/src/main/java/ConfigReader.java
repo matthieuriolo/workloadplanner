@@ -251,4 +251,22 @@ public class ConfigReader {
 		process();
 		return assignments;
 	}
+
+	/**
+	 * Prints the loaded configuration data
+	 * @throws Exception 
+	 */
+	public void printVerbose() throws Exception {
+		process();
+		
+		System.out.println("Configuration file: " + file.getAbsolutePath());
+		System.out.println("Calendar name: " + name);
+		
+		System.out.println("ICS location:");
+		icsLocations.stream().forEach(System.out::println);
+		System.out.println("Vacancies:");
+		vacancies.stream().forEach(c -> c.printVerbose());
+		System.out.println("Assignments:");
+		assignments.stream().forEach(c -> c.printVerbose());
+	}
 }

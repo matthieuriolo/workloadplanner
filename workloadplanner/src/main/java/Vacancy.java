@@ -1,6 +1,7 @@
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 
 /**
  * Immutable class for a vacancy (DateRange when a task should occur)
@@ -94,5 +95,18 @@ public class Vacancy {
 	 */
 	public DateRange getRange(LocalDateTime date) {
 		return new DateRange(getStart(date), getEnd(date));
+	}
+	
+	/**
+	 * Prints the vacancy
+	 */
+	public void printVerbose() {
+		DateTimeFormatter formatter = DateTimeFormatter.ofLocalizedTime(FormatStyle.MEDIUM);
+		
+		System.out.println("Weekday: " + weekday);
+		System.out.println("Start: " + start.format(formatter));
+		System.out.println("End: " + end.format(formatter));
+		System.out.println("Priority: " + priority);
+		System.out.println();
 	}
 }
