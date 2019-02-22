@@ -17,7 +17,12 @@ import org.jdom.Document;
 import org.jdom.Element;
 import org.jdom.input.SAXBuilder;
 
-
+/**
+ * Immutable class which reads in a XML configuration file
+ * 
+ * @author Matthieu Riolo
+ *
+ */
 public class ConfigReader {
 	private File file;
 	private boolean processed = false;
@@ -28,14 +33,26 @@ public class ConfigReader {
 	private List<Vacancy> vacancies = new ArrayList<Vacancy>();
 	private List<Assignment> assignments = new ArrayList<Assignment>();
 	
+	/**
+	 * Constructor of the XML config reader
+	 * @param location of the file as String
+	 */
 	public ConfigReader(String path) {
 		file = new File(path);
 	}
 	
+	/**
+	 * Constructor of the XML config reader
+	 * @param location of the file as File
+	 */
 	public ConfigReader(File file) {
 		this.file = file;
 	}
 	
+	/**
+	 * Parses the XML file
+	 * @throws Exception if the file cannot be found
+	 */
 	public void process() throws Exception {
 		if(processed) {
 			return;
@@ -57,6 +74,11 @@ public class ConfigReader {
 		processed = true;
 	}
 	
+	/**
+	 * Reads the Vacancies, Tasks and Assignments from the XML
+	 * @param the parsed XML file as org.jdom.Document
+	 * @throws Exception 
+	 */
 	private void processDocument(Document doc) throws Exception {
 		Element calendarNode = doc.getRootElement();
 		
@@ -190,21 +212,41 @@ public class ConfigReader {
 		}
 	}
 	
+	/**
+	 * Getter for all ICS files in the configuration
+	 * @return list of all ICS files
+	 * @throws Exception if the file cannot be found or parsed
+	 */
 	public List<File> getPathsToICS() throws Exception {
 		process();
 		return icsLocations;
 	}
 	
+	/**
+	 * Getter for the name for the calendar which will be created to hold the overlap of Tasks and Vacancies
+	 * @return name of the calendar
+	 * @throws Exception if the file cannot be found or parsed
+	 */
 	public String getName() throws Exception {
 		process();
 		return name;
 	}
 	
+	/**
+	 * Getter for all defined Vacancies in the configuration file
+	 * @return all defined Vacancies
+	 * @throws Exception if the file cannot be found or parsed
+	 */
 	public List<Vacancy> getVacancies() throws Exception {
 		process();
 		return vacancies;
 	}
 	
+	/**
+	 * Getter for all defined Assignments in the configuration file
+	 * @return all defined assignments
+	 * @throws Exception if the file cannot be found or parsed
+	 */
 	public List<Assignment> getAssignments() throws Exception {
 		process();
 		return assignments;

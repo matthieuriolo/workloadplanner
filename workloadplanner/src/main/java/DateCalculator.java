@@ -1,13 +1,16 @@
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+
 import java.text.DateFormat;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -31,12 +34,22 @@ import net.fortuna.ical4j.model.property.Uid;
 import net.fortuna.ical4j.model.property.Version;
 import net.fortuna.ical4j.model.property.XProperty;
 
+
+/**
+ * Generates and ICS schedule based on the vacancies and tasks given by the ConfigReader
+ * 
+ * @author Matthieu Riolo
+ *
+ */
 public class DateCalculator {
 	private List<DateRange> reservedRanges;
 	List<EventAssignment> eventAssignments;
 	
-	
-	/* parses the file and fetches all relevant events */
+	/**
+	 * Parses the ICS files and fetches all relevant events
+	 * @param retrieves from the reader all location of the ICS files
+	 * @throws Exception
+	 */
 	private void fetchEvents(ConfigReader reader) throws Exception {
 		/* parse ics file */
 		eventAssignments = new ArrayList<EventAssignment>();
@@ -89,31 +102,15 @@ public class DateCalculator {
 		);
 	}
 	
-	/*
-	private VEvent createEvent(DateRange range, String summary) {
-		return createEvent(range.getStart(), range.getEnd(), summary);
-	}
-	
-	
-	private VEvent createEvent(LocalDateTime start, LocalDateTime end, String summary) {
-		VEvent event = new VEvent(
-				new DateTime(DateTime.from(start.atZone(ZoneId.systemDefault()).toInstant())),
-				new DateTime(DateTime.from(end.atZone(ZoneId.systemDefault()).toInstant())),
-				summary
-		);
-		
-		event.getProperties().add(new Uid(UUID.randomUUID().toString()));
-		
-		TimeZoneRegistry registry = TimeZoneRegistryFactory.getInstance().createRegistry();
-		TimeZone timezone = registry.getTimeZone("GMT");
-		VTimeZone tz = timezone.getVTimeZone();
-		
-		event.getProperties().add(tz.getTimeZoneId());
-		
-		return event;
-	}
-	*/
-	
+	/**
+	 * Creates a new event based on a Task, EventAssignment and a DateRange
+	 * @param the Task which should occur
+	 * @param the assocation of Event and the corresponding Assignment
+	 * @param the DateRange for the task to occur
+	 * @param if the task gets splitted into multiple chunks/subtask the pageIdx will tell you which chunk gets used
+	 * @param total amount of chunks
+	 * @return a new VEvent for the occuring Task
+	 */
 	private VEvent createEvent(Task type, EventAssignment cm, DateRange range, int pageIdx, int pageTotal) {
 		DateFormat formatter = DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT);
 		DateTimeFormatter dtformatter = DateTimeFormatter.ofLocalizedDate(FormatStyle.MEDIUM);
@@ -155,14 +152,23 @@ public class DateCalculator {
 		return event;
 	}
 	
-	private void processEvent(List<CalendarComponent> ret, ConfigReader reader, EventAssignment cm, Task type, LocalDateTime from, LocalDateTime to) throws Exception {
+	/**
+	 * Finds an overlap between a Task and the vacancy
+	 * @param objects holding the found overlap
+	 * @param the available Vacancy
+	 * @param the EventAssignment which contains the task 
+	 * @param the Task which a overlapped is searched for
+	 * @param starting DateTime for the range to search an overlap
+	 * @param end DateTime for the range to search an overlap
+	 * @throws Exception
+	 */
+	private void processEvent(List<CalendarComponent> ret, List<Vacancy> vacancies, EventAssignment cm, Task type, LocalDateTime from, LocalDateTime to) throws Exception {
 		DateFormat formatter = DateFormat.getDateTimeInstance();
 		int hours = type.getDuration();
 		
 		List<DateRange> pages = new LinkedList<>();
 		
-		//Date date = cm.startDate();
-		for(Vacancy vakanz : reader.getVacancies()) {
+		for(Vacancy vakanz : vacancies) {
 			if(hours <= 0) {
 				break;
 			}
@@ -193,13 +199,11 @@ public class DateCalculator {
 				
 				reservedRanges.add(possibleRange);
 				
-				//evt = createEvent(possibleRange, type.getName() + " for " + formatter.format(cm.getEvent().getStartDate().getDate()));
 				pages.add(possibleRange);
 			}
 		}
 		
 		
-
 		int total = pages.size();
 		if(hours > 0) {
 			//we are not able to find free space for the given worktype - add a note and tell the user that he has not enough time
@@ -214,6 +218,12 @@ public class DateCalculator {
 		}
 	}
 	
+	/**
+	 * Finds all overlapping between all tasks and vacancies
+	 * @param the ConfigReader containing all the Assignments, Task and Events
+	 * @return the found overlap of Task and Vacancy
+	 * @throws Exception
+	 */
 	public List<CalendarComponent > calculateEvents(ConfigReader reader) throws Exception {
 		fetchEvents(reader);
 		
@@ -225,21 +235,25 @@ public class DateCalculator {
 		}
 		
 		for(EventAssignment cm : eventAssignments) {
-			for(Task type : cm.getModule().getTasksBefore()) {
+			for(Task type : cm.getAssignment().getTasksBefore()) {
 				DateRange r = cm.beforeRange();
-				processEvent(ret, reader, cm, type, r.getStart(), r.getEnd());
+				processEvent(ret, reader.getVacancies(), cm, type, r.getStart(), r.getEnd());
 			}
 			
-			for(Task type : cm.getModule().getTasksAfter()) {
+			for(Task type : cm.getAssignment().getTasksAfter()) {
 				DateRange r = cm.afterRange();
-				processEvent(ret, reader, cm, type, r.getStart(), r.getEnd());
+				processEvent(ret, reader.getVacancies(), cm, type, r.getStart(), r.getEnd());
 			}
 		}
 		
 		return ret;
 	}
 	
-	
+	/**
+	 * Increasing the given date by one day and removes the hours, minutes and seconds portion
+	 * @param the date which should be increase by one day
+	 * @return date increased by one day
+	 */
 	private LocalDateTime increaseDateByDay(LocalDateTime initialDate) {
 		initialDate.minusHours(initialDate.getHour());
 		initialDate.minusMinutes(initialDate.getMinute());
@@ -249,6 +263,13 @@ public class DateCalculator {
 		return initialDate.plusDays(1);
 	}
 	
+	/**
+	 * Finds all overlapping Tasks and Vacancies and saves them as an ICS
+	 * @param the ConfigReader which contains all the informations
+	 * @param the location to store the file for found overlap
+	 * @return true the file can be saved
+	 * @throws Exception
+	 */
 	public boolean calculateAndSave(ConfigReader reader, File location) throws Exception {
 		List<CalendarComponent> components = calculateEvents(reader);
 		
