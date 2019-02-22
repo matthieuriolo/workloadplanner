@@ -24,7 +24,7 @@ public class DateRange {
 	 * @param to
 	 * @throws Exception if `from` is equal or after `to`
 	 */
-	public DateRange(LocalDateTime from, LocalDateTime to) throws Exception {
+	public DateRange(LocalDateTime from, LocalDateTime to) {
 		initRange(from, to);
 	}
 	
@@ -35,7 +35,7 @@ public class DateRange {
 	 * @param to
 	 * @throws Exception if `from` is equal or after `to`
 	 */
-	public DateRange(Date from, Date to) throws Exception {
+	public DateRange(Date from, Date to) {
 		LocalDateTime f = convertDateToLocaleDateTime(from);
 		LocalDateTime t = convertDateToLocaleDateTime(to);
 		initRange(f, t);
@@ -48,7 +48,7 @@ public class DateRange {
 	 * @param duration in hours
 	 * @throws Exception if `from` is equal or after `to`
 	 */
-	public DateRange(Date from, long duration) throws Exception {
+	public DateRange(Date from, long duration) {
 		LocalDateTime f = convertDateToLocaleDateTime(from);
 		LocalDateTime t = f.plusHours(duration);
 		initRange(f, t);
@@ -61,7 +61,7 @@ public class DateRange {
 	 * @param tolerance in hours. Will be subtracted from `start` and added to `end`
 	 * @throws Exception if `from` is equal or after `to`
 	 */
-	public DateRange(Date from, Date to, long tolerance) throws Exception {
+	public DateRange(Date from, Date to, long tolerance) {
 		LocalDateTime f = convertDateToLocaleDateTime(from);
 		LocalDateTime t = convertDateToLocaleDateTime(to);
 		
@@ -81,9 +81,9 @@ public class DateRange {
 		return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
 	}
 	
-	private void initRange(LocalDateTime from, LocalDateTime to) throws Exception {
+	private void initRange(LocalDateTime from, LocalDateTime to) {
 		if(from.isAfter(to)) {
-			throw new Exception("Param from must be before to");
+			throw new RuntimeException("Param from must be before to");
 		}
 		
 		start = from;
@@ -165,11 +165,11 @@ public class DateRange {
 	/**
 	 * Set the timespan between start and end. Only the property end will change
 	 * @param hours
-	 * @throws Exception
+	 * @throws Exception if hours is less 1
 	 */
-	public void setDuration(long hours) throws Exception {
+	public void setDuration(long hours) {
 		if(hours < 1) {
-			throw new Exception("hours must be more than 0");
+			throw new RuntimeException("hours must be more than 0");
 		}
 		
 		end = start.plus(hours, ChronoUnit.HOURS);
@@ -183,7 +183,7 @@ public class DateRange {
 	 * @return list of ranges which fits into the border of this range without colliding with the givesn ranges
 	 * @throws Exception if the constructor of DateRange fails or if there is an internal failure
 	 */
-	public List<DateRange> substractCollisions(List<DateRange> ranges) throws Exception {
+	public List<DateRange> substractCollisions(List<DateRange> ranges) {
 		List<DateRange> looper = new ArrayList<DateRange>();
 		looper.add(this);
 		boolean hasCollision;
@@ -217,7 +217,7 @@ public class DateRange {
 								System.out.println(r.getStart() + " " + r.getEnd());
 								System.out.println(range.getStart() + " " + range.getEnd());
 								
-								throw new Exception("Internal logic error");
+								throw new RuntimeException("Internal logic error");
 							}
 						}
 						

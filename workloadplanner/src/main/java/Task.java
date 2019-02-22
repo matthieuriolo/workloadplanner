@@ -18,9 +18,9 @@ public class Task {
 	 * @param duration duration of the task in hours
 	 * @throws Exception if duration is smaller than 1
 	 */
-	public Task(String name, boolean isBefore, int duration) throws Exception {
+	public Task(String name, boolean isBefore, int duration) {
 		if(duration < 1) {
-			throw new Exception("The duration has to be at least 1 hour");
+			throw new RuntimeException("The duration has to be at least 1 hour");
 		}
 
 		this.name = name;

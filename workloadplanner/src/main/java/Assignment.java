@@ -23,13 +23,13 @@ public class Assignment {
 	 * @param travelHours is a timespan which will be added before and after the event
 	 * @throws an Exception if no regex is passed or a negative travel hours
 	 */
-	public Assignment(String regex, int travelHours) throws Exception {
+	public Assignment(String regex, int travelHours) {
 		if(regex.length() == 0) {
-			throw new Exception("You must give a regex pattern");
+			throw new RuntimeException("You must give a regex pattern");
 		}
 		
 		if(travelHours < 0) {
-			throw new Exception("Travel hours cannot be negative");
+			throw new RuntimeException("Travel hours cannot be negative");
 		}
 		
 		this.regex = regex;
@@ -133,9 +133,8 @@ public class Assignment {
 	 * @param name of the new task
 	 * @param isBefore if the task should occur before or after the event
 	 * @param duration of the task
-	 * @throws Exception is thrown when duration is less than 1
 	 */
-	public void addTask(String name, boolean isBefore, int duration) throws Exception {
+	public void addTask(String name, boolean isBefore, int duration) {
 		tasks.add(new Task(name, isBefore, duration));
 	}
 }

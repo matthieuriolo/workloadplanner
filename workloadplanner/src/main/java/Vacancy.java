@@ -14,9 +14,9 @@ public class Vacancy {
 	private LocalTime end;
 	private int priority;
 	
-	public Vacancy(int weekday, String start, String end, int priority) throws Exception {
+	public Vacancy(int weekday, String start, String end, int priority) {
 		if(weekday < 1 || weekday > 7) {
-			throw new Exception("Weekday must be in range of 1-7");
+			throw new RuntimeException("Weekday must be in range of 1-7");
 		}
 		
 		this.weekday = weekday;
@@ -92,7 +92,7 @@ public class Vacancy {
 	 * @return a DateRange with start and end time of the vacancy for the given date
 	 * @throws Exception
 	 */
-	public DateRange getRange(LocalDateTime date) throws Exception {
+	public DateRange getRange(LocalDateTime date) {
 		return new DateRange(getStart(date), getEnd(date));
 	}
 }

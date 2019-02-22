@@ -160,9 +160,8 @@ public class DateCalculator {
 	 * @param the Task which a overlapped is searched for
 	 * @param starting DateTime for the range to search an overlap
 	 * @param end DateTime for the range to search an overlap
-	 * @throws Exception
 	 */
-	private void processEvent(List<CalendarComponent> ret, List<Vacancy> vacancies, EventAssignment cm, Task type, LocalDateTime from, LocalDateTime to) throws Exception {
+	private void processEvent(List<CalendarComponent> ret, List<Vacancy> vacancies, EventAssignment cm, Task type, LocalDateTime from, LocalDateTime to) {
 		DateFormat formatter = DateFormat.getDateTimeInstance();
 		int hours = type.getDuration();
 		

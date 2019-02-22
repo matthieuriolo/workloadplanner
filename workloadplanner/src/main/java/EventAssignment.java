@@ -29,11 +29,11 @@ public class EventAssignment {
 	 * @returnthe previous event of assignments
 	 * @throws Exception if the event cannot be found
 	 */
-	public VEvent previousEvent() throws Exception {
+	public VEvent previousEvent() {
 		int pos = assignment.getEvents().indexOf(event);
 		
 		if(pos < 0) {
-			throw new Exception("Internal error: could not find event");
+			throw new RuntimeException("Internal error: could not find event");
 		}
 		
 		
@@ -49,11 +49,11 @@ public class EventAssignment {
 	 * @returnthe next event of assignments
 	 * @throws Exception if the event cannot be found
 	 */
-	public VEvent nextEvent() throws Exception {
+	public VEvent nextEvent() {
 		int pos = assignment.getEvents().indexOf(event);
 		
 		if(pos < 0) {
-			throw new Exception("Internal error: could not find event");
+			throw new RuntimeException("Internal error: could not find event");
 		}
 		
 		if(pos + 1 < assignment.getEvents().size()) {
@@ -84,7 +84,7 @@ public class EventAssignment {
 	 * @return DateRange between previous event and assigned event 
 	 * @throws Exception
 	 */
-	public DateRange beforeRange() throws Exception {
+	public DateRange beforeRange() {
 		Date start;
 		if(previousEvent() == null) {
 			//init lastDateTime as first found event - 2 weeks
@@ -101,7 +101,7 @@ public class EventAssignment {
 	 * @return DateRange between assigned event and next event
 	 * @throws Exception
 	 */
-	public DateRange afterRange() throws Exception {
+	public DateRange afterRange() {
 		Date end;
 		if(nextEvent() == null) {
 			//init lastDateTime as first found event - 2 weeks
