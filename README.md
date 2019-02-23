@@ -7,7 +7,7 @@ This tool can be very useful if you need to calculate mandatory preperation time
 
 ## the config file
 
-You need to provide in the config file a URL to an existing ics file. Define your vacancies in the worktime node. You can give to each vacancy a priority (smaller first). Define a set of Regex patterns which matches against the events given in the downloaded ics file.
+You need to provide in the config file a URL to an existing ics file. Define your vacancies in the worktime node. You can give to each vacancy a priority (larger first). Define a set of Regex patterns which matches against the events given in the downloaded ics file.
 
 ```
 <?xml version="1.0" encoding="UTF-8"?>
@@ -53,3 +53,15 @@ The attribute `name` of the xml node `task` can contain the following placeholde
  | {from} | start datetime of the created task event |
  | {to} | end datetime of the created task event |
  | {duration} | duration in hours of the created task event |
+ 
+ ## Arguments
+ 
+ The command can parse the following arguments
+ 
+ | Argument    |     Long    | Description |
+ | ----------- | ----------- | ----------- |
+ | h | help | shows help message |
+ | V | version | prints out current version |
+ | v | verbose | turns on verbose mode |
+ | c | configuration | location of the configuration file (default: config.xml) |
+ | f | file | location for the output file of the ICS file (default: out.ics) |
