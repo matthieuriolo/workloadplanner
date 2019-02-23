@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>workloadplanner</groupId>
   <artifactId>workloadplanner</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>1.1</version>
   <name>WorkloadPlanner</name>
   <dependencies>
   	<dependency>
@@ -21,9 +21,9 @@
   		<version>1.1</version>
   	</dependency>
   	<dependency>
-  		<groupId>com.zaubersoftware.taglibs</groupId>
-  		<artifactId>dateutils</artifactId>
-  		<version>1.0.8</version>
+  		<groupId>org.mod4j.org.apache.commons</groupId>
+  		<artifactId>cli</artifactId>
+  		<version>1.0.0</version>
   	</dependency>
   </dependencies>
   

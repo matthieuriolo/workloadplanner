@@ -1,5 +1,12 @@
 import java.io.File;
 
+import org.apache.commons.cli.CommandLine;
+import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.GnuParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
+
 /**
  * Class containing the main method
  * 
@@ -18,21 +25,44 @@ public class App {
 	 * @throws Exception when there is a failure in the reader or calculator
 	 */
 	public static void main(String[] args) throws Exception {
-		boolean isVerbose = true;
-		
-		for(int idx = 0; idx < args.length; idx++) {
-			String argument = args[idx];
-			
-			switch(argument) {
-				case "--verbose":
-				case "-v":
-					isVerbose = true;
-					break;
-			}
-		}
-		
+		boolean isVerbose = false;
 		String configName = "config.xml";
+		String storeFile = "out.ics";
 		
+		Options options = new Options();
+		options.addOption(new Option("h", "help", false, "Help message"));
+		options.addOption(new Option("v", "verbose", false, "Verbose mode"));
+		options.addOption(new Option("c", "configuration", true, "The location of the XML configuration file"));
+		options.addOption(new Option("f", "file", true, "The location where to store the ICS file"));
+		
+		CommandLineParser parser = new GnuParser();
+		CommandLine commandLine = parser.parse(options, args);
+		
+        if(commandLine.hasOption("c")) {
+            configName = commandLine.getOptionValue("c");
+        }
+        
+        if(commandLine.hasOption("f")) {
+        	storeFile = commandLine.getOptionValue("f");
+        }
+        
+        if(commandLine.hasOption("v")) {
+        	isVerbose = true;
+        }
+        
+        if(commandLine.hasOption("h")) {
+			HelpFormatter formatter = new HelpFormatter();
+			formatter.printHelp(
+				APPNAME,
+				"Create ICS with the overlapping of tasks and vacancies",
+				options,
+				"Created by " + CREATOR + ", version " + VERSION,
+				true
+			);
+			
+        	System.exit(1);
+        }
+        
 		
 		/* read in the configuration file */
 		ConfigReader conf = new ConfigReader(configName);
@@ -46,7 +76,7 @@ public class App {
 		
 		DateCalculator calc = new DateCalculator(isVerbose);
 		
-		File f = new File("out.ics");
+		File f = new File(storeFile);
 		if(calc.calculateAndSave(conf, f)) {
 			System.out.println("Events have been calculated and stored in " + f.getAbsolutePath());
 		}
