@@ -31,6 +31,7 @@ public class App {
 		
 		Options options = new Options();
 		options.addOption(new Option("h", "help", false, "Help message"));
+		options.addOption(new Option("V", "version", false, "Prints version number"));
 		options.addOption(new Option("v", "verbose", false, "Verbose mode"));
 		options.addOption(new Option("c", "configuration", true, "The location of the XML configuration file"));
 		options.addOption(new Option("f", "file", true, "The location where to store the ICS file"));
@@ -50,6 +51,11 @@ public class App {
         	isVerbose = true;
         }
         
+        if(commandLine.hasOption("V")) {
+        	System.out.println(VERSION);
+        	System.exit(0);
+        }
+        
         if(commandLine.hasOption("h")) {
 			HelpFormatter formatter = new HelpFormatter();
 			formatter.printHelp(
@@ -60,7 +66,7 @@ public class App {
 				true
 			);
 			
-        	System.exit(1);
+        	System.exit(0);
         }
         
 		
