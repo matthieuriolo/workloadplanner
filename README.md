@@ -7,7 +7,7 @@ This tool can be very useful if you need to calculate mandatory preperation time
 
 ## the config file
 
-You need to provide in the config file a URL to an existing ics file. Define your vacancies in the worktime node. You can give to each vacancy a priority (larger first). Define a set of Regex patterns which matches against the events given in the downloaded ics file.
+You need to provide in the config file a URL to an existing ics file. Define your vacancies in the worktime node. You can give to each vacancy a priority (smallest will be reserved first, largest will be tried to kept free). Define a set of Regex patterns which matches against the events given in the downloaded ics file.
 
 ```
 <?xml version="1.0" encoding="UTF-8"?>
